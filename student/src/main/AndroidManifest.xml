@@ -2,8 +2,9 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <application
         android:allowBackup="true"
-        android:icon="@drawable/cyber_pulse_mark"
+        android:icon="@mipmap/ic_launcher"
         android:label="StudyLock Student"
+        android:roundIcon="@mipmap/ic_launcher"
         android:supportsRtl="true"
         android:theme="@style/Theme.CyberPulse">
         <activity
