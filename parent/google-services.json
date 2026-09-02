@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "126746983812",
+    "project_id": "studylock-family",
+    "storage_bucket": "studylock-family.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:126746983812:android:5c7428ed7e65253198b1d1",
+        "android_client_info": {
+          "package_name": "com.studylock.parent"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAicvQXGfV2o2mV1zjO3PNe98lrj9DPojc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:126746983812:android:05e571925837aafa98b1d1",
+        "android_client_info": {
+          "package_name": "com.studylock.student"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAicvQXGfV2o2mV1zjO3PNe98lrj9DPojc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
