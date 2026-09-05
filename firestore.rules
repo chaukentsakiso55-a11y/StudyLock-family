@@ -1,0 +1,56 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /studylock_parent_channels/{code} {
+      allow get: if request.auth != null;
+      allow list: if false;
+
+      allow create: if request.auth != null
+        && request.resource.data.parentUid == request.auth.uid
+        && request.resource.data.studentUid == null;
+
+      allow update: if request.auth != null && (
+        resource.data.parentUid == request.auth.uid ||
+        (
+          resource.data.studentUid == null &&
+          request.resource.data.studentUid == request.auth.uid &&
+          request.resource.data.parentUid == resource.data.parentUid &&
+          request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+            'studentUid', 'connected', 'studentOnline', 'lastStudentSeenMs', 'studentState', 'updatedAtMs'
+          ])
+        ) ||
+        (
+          resource.data.studentUid == request.auth.uid &&
+          request.resource.data.parentUid == resource.data.parentUid &&
+          request.resource.data.studentUid == resource.data.studentUid &&
+          request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+            'connected', 'studentOnline', 'lastStudentSeenMs', 'studentState', 'updatedAtMs'
+          ])
+        )
+      );
+
+      allow delete: if request.auth != null && resource.data.parentUid == request.auth.uid;
+
+      match /messages/{messageId} {
+        function channel() {
+          return get(/databases/$(database)/documents/studylock_parent_channels/$(code)).data;
+        }
+        function isParent() {
+          return request.auth != null && channel().parentUid == request.auth.uid;
+        }
+        function isStudent() {
+          return request.auth != null && channel().studentUid == request.auth.uid;
+        }
+        allow read: if isParent() || isStudent();
+        allow create: if (isParent() || isStudent())
+          && request.resource.data.senderUid == request.auth.uid
+          && (
+            (isParent() && request.resource.data.senderRole == 'parent') ||
+            (isStudent() && request.resource.data.senderRole == 'student')
+          );
+        allow update, delete: if false;
+      }
+    }
+  }
+}
