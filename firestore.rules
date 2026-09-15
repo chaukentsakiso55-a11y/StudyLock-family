@@ -52,5 +52,55 @@ service cloud.firestore {
         allow update, delete: if false;
       }
     }
+
+    // Teacher/Classroom channel. Kept separate from Parent controls so a teacher
+    // cannot unlock settings, change app restrictions, or impersonate a parent.
+    match /studylock_teacher_classes/{code} {
+      function signedIn() { return request.auth != null; }
+      function classData() {
+        return get(/databases/$(database)/documents/studylock_teacher_classes/$(code)).data;
+      }
+      function isTeacher() {
+        return signedIn() && classData().teacherUid == request.auth.uid;
+      }
+      function isJoinedStudent() {
+        return signedIn() && exists(/databases/$(database)/documents/studylock_teacher_classes/$(code)/students/$(request.auth.uid));
+      }
+
+      allow get: if signedIn();
+      allow list: if false;
+      allow create: if signedIn()
+        && request.resource.data.teacherUid == request.auth.uid;
+      allow update, delete: if isTeacher();
+
+      match /students/{studentUid} {
+        function teacherOwnsClass() {
+          return request.auth != null
+            && get(/databases/$(database)/documents/studylock_teacher_classes/$(code)).data.teacherUid == request.auth.uid;
+        }
+        allow read: if teacherOwnsClass() || (request.auth != null && request.auth.uid == studentUid);
+        allow create, update: if request.auth != null && request.auth.uid == studentUid;
+        allow delete: if teacherOwnsClass() || (request.auth != null && request.auth.uid == studentUid);
+      }
+
+      match /messages/{messageId} {
+        function teacherOwnsClass() {
+          return request.auth != null
+            && get(/databases/$(database)/documents/studylock_teacher_classes/$(code)).data.teacherUid == request.auth.uid;
+        }
+        function studentJoined() {
+          return request.auth != null
+            && exists(/databases/$(database)/documents/studylock_teacher_classes/$(code)/students/$(request.auth.uid));
+        }
+        allow read: if teacherOwnsClass() || studentJoined();
+        allow create: if request.auth != null
+          && request.resource.data.senderUid == request.auth.uid
+          && (
+            (teacherOwnsClass() && request.resource.data.senderRole == 'teacher') ||
+            (studentJoined() && request.resource.data.senderRole == 'student')
+          );
+        allow update, delete: if teacherOwnsClass();
+      }
+    }
   }
 }
