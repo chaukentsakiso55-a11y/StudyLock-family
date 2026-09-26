@@ -14,8 +14,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "StudyLock"
-include(":app")
-include(":parent")
-include(":wear")
-include(":teacher")
+rootProject.name = "StudyLockFamily"
+include(":student", ":parent", ":shared")
